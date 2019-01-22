@@ -76,7 +76,7 @@ class CupidCommand extends Command
         $io->section('cupid 要求');
         $io->listing(array(
             '<info>php >= 7.2</info>',
-            '<info>swoole >= 4.2.*</info>',
+            '<info>swoole >= 4.2.12</info>',
         ));
         $io->section('help');
         $io->listing(array(
