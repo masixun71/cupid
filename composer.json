@@ -1,0 +1,40 @@
+{
+    "name": "jue/cupid",
+    "type": "project",
+    "keywords": [
+        "php",
+        "swoole"
+    ],
+    "authors": [
+        {
+            "name": "马斯珣",
+            "email": "masixun71@foxmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "symfony/console": "@stable",
+        "monolog/monolog": "^1.23",
+        "hassankhan/config": "^2.0",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "eaglewu/swoole-ide-helper": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jue\\Cupid\\": "src/"
+        }
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.laravel-china.org"
+        }
+    },
+    "config": {
+        "secure-http": false
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "workerNumber": 3,
+    "src": {
+        "dsn": "mysql:dbname=my;host=127.0.0.1;port=3306",
+        "user": "test",
+        "password": "test",
+        "table": "user",
+        "byColumn": "number",
+        "insert": true,
+        "insertIntervalMillisecond": 2000,
+        "update": true,
+        "updateColumn": "update_time",
+        "updateIntervalMillisecond": 2000,
+        "updateScanSecond": 5,
+        "updateTimeFormate": "Y-m-d H:i:s",
+        "cacheFilePath": "/tmp",
+        "pushbearSendKey": "9724-73bdacb319007f53f83d0123213b4ec964"
+    },
+    "des": [
+        {
+            "dsn": "mysql:dbname=my2;host=127.0.0.1;port=3306",
+            "user": "test",
+            "password": "test",
+            "table": "user",
+            "columns": {
+                "number": "number",
+                "name": "name",
+                "avatar": "avatar"
+            },
+            "byColumn": "number",
+            "callbackNotification": {
+                "url" : "127.0.0.1:20000/test/callback"
+            }
+
+        }
+    ]
+}
