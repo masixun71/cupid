@@ -20,11 +20,13 @@ class PdoManager
         $this->user = $user;
         $this->password = $password;
 
-        $this->pdo = new \PDO($dsn, $user, $password, array(\PDO::ATTR_PERSISTENT => true, \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
+        $this->pdo = new \PDO($dsn, $user, $password, array(\PDO::ATTR_PERSISTENT => true));
+        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
     public function connect() {
-        $this->pdo = new \PDO($this->dsn, $this->user, $this->password, array(\PDO::ATTR_PERSISTENT => true, \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
+        $this->pdo = new \PDO($this->dsn, $this->user, $this->password, array(\PDO::ATTR_PERSISTENT => true));
+        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
     public function getPdo() {

@@ -86,7 +86,8 @@ class ProcessPool
         $dsn = $this->conf->get('src.dsn');
         $user = $this->conf->get('src.user');
         $password = $this->conf->get('src.password');
-        $pdo = new \PDO($dsn, $user, $password, array(\PDO::ATTR_PERSISTENT => true));
+
+        $pdoManager = new PdoManager($dsn, $user, $password);
         $idManager = new IdManager();
         $idManager->setCurrentId($this->conf->get('src.insertStartId', 0));
         $cacheFilePath = $this->conf->get('src.cacheFilePath') . '/cupid.txt';
@@ -131,28 +132,48 @@ class ProcessPool
 
         if ($this->conf->get('src.insert', false)) {
             swoole_timer_tick($this->conf->get('src.insertIntervalMillisecond'), function ($timeId, $p) {
-                /** @var \PDO $pdo */
+                /** @var PdoManager $pdoManager */
                 /** @var IdManager $idManager */
-                list($pdo, $idManager) = $p;
-                $stmt = $pdo->query('SELECT max(id) as maxId from ' . $this->conf->get('src.table'), \PDO::FETCH_ASSOC);
-                $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+                list($pdoManager, $idManager) = $p;
+                try {
+                    $stmt = $pdoManager->getPdo()->query('SELECT max(id) as maxId from ' . $this->conf->get('src.table'), \PDO::FETCH_ASSOC);
+                    $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+                } catch (\PDOException $e) {
+                    if ($e->getCode() == "HY000") {
+                        $pdoManager->connect();
+                        $stmt = $pdoManager->getPdo()->query('SELECT max(id) as maxId from ' . $this->conf->get('src.table'), \PDO::FETCH_ASSOC);
+                        $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    } else {
+                        throw  $e;
+                    }
+                }
                 $idManager->setMaxId((int)$res['maxId']);
-            }, [$pdo, $idManager]);
+            }, [$pdoManager, $idManager]);
         }
         if ($this->conf->get('src.update', false)) {
             if (is_null($this->conf->get('src.updateScanSecond'))) {
                 throw new \Exception("you need set src.updateScanSecond");
             }
             swoole_timer_tick($this->conf->get('src.updateIntervalMillisecond'), function ($timeId, $p) {
-                /** @var \PDO $pdo */
+                /** @var PdoManager $pdoManager */
                 /** @var IdManager $idManager */
-                list($pdo, $idManager) = $p;
+                list($pdoManager, $idManager) = $p;
                 $end = time();
                 $updateScanSecond = $this->conf->get('src.updateScanSecond');
                 $begin = $end - $updateScanSecond;
                 $updateSql = 'SELECT id from ' . $this->conf->get('src.table') . ' where ' . $this->conf->get('src.updateColumn') .' between \'' . date($this->conf->get('src.updateTimeFormate'), $begin) . '\' and \'' . date($this->conf->get('src.updateTimeFormate') . '\'', $end);
-                $stmt = $pdo->query($updateSql, \PDO::FETCH_ASSOC);
-                $res = $stmt->fetchAll();
+                try {
+                    $stmt = $pdoManager->getPdo()->query($updateSql, \PDO::FETCH_ASSOC);
+                    $res = $stmt->fetchAll();
+                } catch (\PDOException $e) {
+                    if ($e->getCode() == "HY000") {
+                        $pdoManager->connect();
+                        $stmt = $pdoManager->getPdo()->query($updateSql, \PDO::FETCH_ASSOC);
+                        $res = $stmt->fetchAll();
+                    } else {
+                        throw  $e;
+                    }
+                }
                 if (!empty($res)) {
                     foreach ($res as $id) {
                         $loop = true;
@@ -171,7 +192,7 @@ class ProcessPool
                     }
                 }
 
-            }, [$pdo, $idManager]);
+            }, [$pdoManager, $idManager]);
         }
 
         swoole_timer_tick(10000, function ($timeId){
