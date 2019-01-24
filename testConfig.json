@@ -1,5 +1,6 @@
 {
     "workerNumber": 3,
+    "logDir": "/tmp",
     "src": {
         "dsn": "mysql:dbname=my;host=127.0.0.1;port=3306",
         "user": "test",

@@ -6,6 +6,7 @@ namespace Jue\Cupid\ProcessPool;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Jue\Cupid\Loggers\LoggerManager;
 use Jue\Cupid\Managers\IdManager;
 use Jue\Cupid\Managers\PdoManager;
 use Jue\Cupid\Notification\PushBear;
@@ -66,6 +67,7 @@ class ProcessPool
         $this->chan = $chan;
 
         $pool->on("WorkerStart", function ($pool, $workerId) {
+            LoggerManager::newLogger($this->conf->get('logDir'), $workerId);
             if ($workerId == 0) {
                 $this->initManagerWorker();
             } elseif ($workerId == 1) {
@@ -87,6 +89,11 @@ class ProcessPool
         $user = $this->conf->get('src.user');
         $password = $this->conf->get('src.password');
 
+        logger()->info('本次数据同步补偿关心', [
+            'table' => $this->conf->get('src.table')
+        ]);
+
+
         $pdoManager = new PdoManager($dsn, $user, $password);
         $idManager = new IdManager();
         $idManager->setCurrentId($this->conf->get('src.insertStartId', 0));
@@ -96,17 +103,20 @@ class ProcessPool
             $cacheFile = fopen($cacheFilePath, "w");
             fwrite($cacheFile, (string)$idManager->getCurrentId());
             fclose($cacheFile);
+            logger()->info('写入cacheFile最后id值成功');
         });
         Process::signal(SIGCHLD, function () use ($idManager, $cacheFilePath){
             $cacheFile = fopen($cacheFilePath, "w");
             fwrite($cacheFile, (string)$idManager->getCurrentId());
             fclose($cacheFile);
+            logger()->info('写入cacheFile最后id值成功');
         });
         if (file_exists($cacheFilePath)) {
             $cacheFile = fopen($cacheFilePath, "r");
             $insertStartId = fread($cacheFile,filesize($cacheFilePath));
             fclose($cacheFile);
             if (!empty($insertStartId)) {
+                logger()->info('从cacheFile获取到缓存id值成功');
                 $idManager->setCurrentId((int)$insertStartId);
             }
         }
@@ -118,6 +128,9 @@ class ProcessPool
                 $tableI = $this->table->get($key);
                 if ($tableI['currentId'] == $tableI['nextId']) {
                     if ($idManager->hasNewId()) {
+                        logger()->info('table中有新id', [
+                            'newId' => $idManager->getCurrentId()
+                        ]);
                         $this->table->set($key, ['nextId' => $idManager->getCurrentId()]);
                         $idManager->incrCurrentId();
                     }
@@ -147,7 +160,12 @@ class ProcessPool
                         throw  $e;
                     }
                 }
-                $idManager->setMaxId((int)$res['maxId']);
+                if ($idManager->getMaxId() < (int)$res['maxId']) {
+                    logger()->info('insert事件中监听到新数据插入', [
+                        'newId' => $res['maxId']
+                    ]);
+                    $idManager->setMaxId((int)$res['maxId']);
+                }
             }, [$pdoManager, $idManager]);
         }
         if ($this->conf->get('src.update', false)) {
@@ -183,6 +201,9 @@ class ProcessPool
                                 $key = (string)$i;
                                 $tableI = $this->table->get($key);
                                 if ($tableI['currentId'] == $tableI['nextId']) {
+                                    logger()->info('update事件中监听到有数据更新', [
+                                        'updateId' => $id['id']
+                                    ]);
                                     $this->table->set($key, ['nextId' => (int)$id['id']]);
                                     $loop = false;
                                     break;
@@ -202,7 +223,11 @@ class ProcessPool
                 $tableI = $this->collectTable->get($key);
                 if ($tableI) {
                     $memory = $tableI['memory'];
-//                    var_dump('workerId:'. $i . ',memory:' . $memory . 'MB');
+
+                    logger()->info('进程当前内存值', [
+                        'workerId' => $i,
+                        'memory(MB)' => $memory
+                    ]);
                 }
             }
 
@@ -217,8 +242,10 @@ class ProcessPool
         while (true) {
             /** @var SqlEvent $sqlEvent */
             $sqlEvent = $this->chan->pop();
-
             if (!empty($sqlEvent)) {
+                logger()->info('从回调队列取出回调数据', [
+                    'sqlEvent' => $sqlEvent->toArray()
+                ]);
                 $client = new Client();
                 try {
                     $res = $client->request('POST', $sqlEvent->getCallbackUrl(), [
@@ -229,15 +256,26 @@ class ProcessPool
                     ]);
                     if ($res->getStatusCode() != 200) {
                         if ($sqlEvent->getRetriesTime() == 10 && !empty($pushbearSendKey)) {
+                            logger()->error('数据同步补偿数据回调地址已超过'.$sqlEvent->getRetriesTime().'次调用不成功,重新push到回调队列', [
+                                'sqlEvent' => $sqlEvent->toArray(),
+                                'resStatusCode' => $res->getStatusCode()
+                            ]);
                             PushBear::push($pushbearSendKey, '数据同步补偿数据回调地址已超过'.$sqlEvent->getRetriesTime().'次调用不成功:请及时检查回调地址', "## sqlEvent\n\n`" . $sqlEvent->toJson() . "`\n\n## responseStatus\n\n" . $res->getStatusCode());
                         }
                         $sqlEvent->incrRetriesTime();
                         $this->chan->push($sqlEvent);
                     } else {
+                        logger()->info('数据同步补偿数据回调成功', [
+                            'sqlEvent' => $sqlEvent->toArray(),
+                            'resStatusCode' => $res->getStatusCode()
+                        ]);
                         PushBear::push($pushbearSendKey, '数据同步补偿数据回调地址成功', "## sqlEvent\n\n`" . $sqlEvent->toJson() . "`");
                     }
                 } catch (GuzzleException $exception) {
-
+                    logger()->error('数据同步补偿数据回调地址无法请求,重新push到回调队列', [
+                        'sqlEvent' => $sqlEvent->toArray(),
+                        'exception' => $exception->getMessage()
+                    ]);
                     PushBear::push($pushbearSendKey, '数据同步补偿数据回调地址无法请求', "## sqlEvent\n\n`" . $sqlEvent->toJson() . "`\n\n## errorMessage\n\n" . $exception->getMessage());
                     $sqlEvent->incrRetriesTime();
                     $this->chan->push($sqlEvent);
@@ -311,14 +349,28 @@ class ProcessPool
 
                                 if (empty($desArray)) {
                                     $this->chan->push(new SqlEvent(SqlEvent::INSERT, $srcArray, $this->conf['des'][$keyPdo]['callbackNotification']['url']));
-
-                                    var_dump('缺少数据' . $this->conf['des'][$keyPdo]['table'] . ':' . $this->conf['des'][$keyPdo]['byColumn'] . $byColumn);
+                                    logger()->error('数据同步检查发现缺少数据,push到回调队列', [
+                                        'srcTable' => $this->conf->get('src.table'),
+                                        'srcByColumn' => $this->conf->get('src.byColumn'),
+                                        'desTable' =>$this->conf['des'][$keyPdo]['table'],
+                                        'desByColumn' => $this->conf['des'][$keyPdo]['byColumn'],
+                                        'srcArray' => $srcArray,
+                                    ]);
+//                                    var_dump('缺少数据' . $this->conf['des'][$keyPdo]['table'] . ':' . $this->conf['des'][$keyPdo]['byColumn'] . $byColumn);
                                 } else {
                                     foreach ($this->conf['des'][$keyPdo]['columns'] as $keyColumn => $column) {
 
                                         if ($srcArray[$keyColumn] != $desArray[$column]) {
                                             $this->chan->push(new SqlEvent(SqlEvent::UPDATE, $srcArray, $this->conf['des'][$keyPdo]['callbackNotification']['url']));
-                                            var_dump('数据不准确' . $this->conf['des'][$keyPdo]['table'] . ':' . $this->conf['des'][$keyPdo]['byColumn'] . ':' . $byColumn .':'. $srcArray[$keyColumn] . ':' . $desArray[$column]);
+                                            logger()->error('数据同步检查发现数据对不上,push到回调队列', [
+                                                'srcTable' => $this->conf->get('src.table'),
+                                                'srcByColumn' => $this->conf->get('src.byColumn'),
+                                                'desTable' =>$this->conf['des'][$keyPdo]['table'],
+                                                'desByColumn' => $this->conf['des'][$keyPdo]['byColumn'],
+                                                'srcArray' => $srcArray,
+                                                'desArray' => $desArray
+                                            ]);
+//                                            var_dump('数据不准确' . $this->conf['des'][$keyPdo]['table'] . ':' . $this->conf['des'][$keyPdo]['byColumn'] . ':' . $byColumn .':'. $srcArray[$keyColumn] . ':' . $desArray[$column]);
                                         }
 
                                     }

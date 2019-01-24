@@ -53,7 +53,7 @@ class IdManager
 
 
     public function hasNewId() {
-        return $this->currentId < $this->maxId;
+        return $this->currentId <= $this->maxId;
     }
 
 }

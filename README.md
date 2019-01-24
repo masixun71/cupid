@@ -39,6 +39,7 @@ composer install
 ```php
     {
     "workerNumber": 3, //最低值3，前2个进程是manager和callback进程，之后的才是处理进程
+	"logDir": "/tmp", //日志目录，进程日志会打印到该目录下
     "src": {
         "dsn": "mysql:dbname=my;host=127.0.0.1;port=3306",//数据库dsn配置
         "user": "test",//数据库用户名
@@ -98,6 +99,28 @@ pushbear是一个基于微信模板的一对多消息送达服务，使用简单
 
 
 
+# 回调形式
+
+回调采用的是`POST`形式，Content-Type 为 `application/json`
+
+```php
+{
+	"type" : 1, 
+    "srcColumn" : {
+    	"column1": 1,
+    	"column2": "2",
+    	"column3": 1.2
+    }
+}
+```
+
+- type, 指的是变更类型，insert是1,update是2
+- srcColumn, 指的是源数据列，会把整个源数据传给你
+
+### 回调失败后会重新推入队列，继续回调
+
+
+
 # supervisord
 
 该项目比较适合搭配supervisord使用,基本上配置文件应该如下
@@ -124,5 +147,4 @@ loglevel=debug
 
 # todo
 
-- 日志支持，记录完备的日志供查询
-- 进程内存查看，避免某些进程存在内存泄漏
+- 进程异常崩溃后，把队列数据存入文件中，保证下次消费

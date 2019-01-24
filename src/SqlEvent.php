@@ -61,6 +61,15 @@ class SqlEvent
 
     }
 
+    public function toArray() {
+        return [
+            'type' => $this->type,
+            'srcColumn' => $this->srcColumn,
+            'callbackUrl' => $this->callbackUrl
+        ];
+    }
+
+
     public function incrRetriesTime() {
         $this->retriesTime++;
     }

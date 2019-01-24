@@ -26,7 +26,10 @@
     "autoload": {
         "psr-4": {
             "Jue\\Cupid\\": "src/"
-        }
+        },
+        "files": [
+            "helpers.php"
+        ]
     },
     "repositories": {
         "packagist": {
