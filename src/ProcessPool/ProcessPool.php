@@ -245,7 +245,7 @@ class ProcessPool
 
         $pushbearSendKey = $this->conf->get('src.pushbearSendKey');
 
-        swoole_timer_tick(2000, function () use ($pushbearSendKey) {
+        swoole_timer_tick($this->conf->get('callbackWorkerIntervalMillisecond'), function () use ($pushbearSendKey) {
             /** @var SqlEvent $sqlEvent */
             $sqlEvent = $this->chan->pop();
             if (!empty($sqlEvent)) {
@@ -318,7 +318,7 @@ class ProcessPool
                 $pdoDess[] = new PdoManager($dsn, $user, $password);
             }
 
-            swoole_timer_tick(2000, function () use ($key, $pdoSrc, $pdoDess) {
+            swoole_timer_tick($this->conf->get('taskWorkerIntervalMillisecond'), function () use ($key, $pdoSrc, $pdoDess) {
                 $tableI = $this->table->get($key);
                 if ($tableI) {
                     if ($tableI['currentId'] != $tableI['nextId']) {

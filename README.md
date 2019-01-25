@@ -40,6 +40,8 @@ composer install
     {
     "workerNumber": 3, //最低值3，前2个进程是manager和callback进程，之后的才是处理进程
 	"logDir": "/tmp", //日志目录，进程日志会打印到该目录下
+	"callbackWorkerIntervalMillisecond": 1000, //回调进程间隔多长时间处理一次
+    "taskWorkerIntervalMillisecond": 1000, //task进程间隔多长时间处理一次
     "src": {
         "dsn": "mysql:dbname=my;host=127.0.0.1;port=3306",//数据库dsn配置
         "user": "test",//数据库用户名

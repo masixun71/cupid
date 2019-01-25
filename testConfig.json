@@ -1,6 +1,8 @@
 {
     "workerNumber": 3,
     "logDir": "/tmp",
+    "callbackWorkerIntervalMillisecond": 1000,
+    "taskWorkerIntervalMillisecond": 1000,
     "src": {
         "dsn": "mysql:dbname=my;host=127.0.0.1;port=3306",
         "user": "test",
