@@ -85,6 +85,9 @@ class ProcessPool
     }
 
     private function initManagerWorker() {
+
+        @swoole_set_process_name("cupid manager-worker");
+
         $dsn = $this->conf->get('src.dsn');
         $user = $this->conf->get('src.user');
         $password = $this->conf->get('src.password');
@@ -237,9 +240,12 @@ class ProcessPool
     }
 
     private function initCallbackWorker() {
+        @swoole_set_process_name("cupid callback-worker");
+
+
         $pushbearSendKey = $this->conf->get('src.pushbearSendKey');
 
-        while (true) {
+        swoole_timer_tick(2000, function () use ($pushbearSendKey) {
             /** @var SqlEvent $sqlEvent */
             $sqlEvent = $this->chan->pop();
             if (!empty($sqlEvent)) {
@@ -283,12 +289,17 @@ class ProcessPool
             }
             $memory = (int)(memory_get_usage(true) / (1024 * 1024));
             $this->collectTable->set('1', ['memory' => (string)$memory]);
-        }
+        });
+
     }
 
 
 
     private function initOtherWorker($workerId) {
+
+        @swoole_set_process_name("cupid tasker-worker-" . $workerId);
+
+
         Runtime::enableCoroutine();
 
         $key = (string)$workerId;
@@ -307,8 +318,7 @@ class ProcessPool
                 $pdoDess[] = new PdoManager($dsn, $user, $password);
             }
 
-            while (true) {
-
+            swoole_timer_tick(2000, function () use ($key, $pdoSrc, $pdoDess) {
                 $tableI = $this->table->get($key);
                 if ($tableI) {
                     if ($tableI['currentId'] != $tableI['nextId']) {
@@ -384,7 +394,7 @@ class ProcessPool
                 }
                 $memory = (int)(memory_get_usage(true) / (1024 * 1024));
                 $this->collectTable->set($key, ['memory' => (string)$memory]);
-            }
+            });
 
         });
     }
