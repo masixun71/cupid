@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/version-v0.0.0.1-red.svg)
 ![](https://img.shields.io/badge/php-%3E=7.2-orange.svg)
-![](https://img.shields.io/badge/swoole-%3E=4.2.12-blue.svg)
+![](https://img.shields.io/badge/swoole-%3E=4.0.4-blue.svg)
 # cupid
 Data synchronization compensation tool
 
@@ -13,7 +13,7 @@ cupid 是基于`swoole4.0 processPool` 开发的消息同步补偿工具，适�
 
 
 - php 版本最好在7.2以上，目前只测试了7.2的版本，但是理论上7.0以上都可以
-- swoole版本在4.2.12 以上，因为用了许多新特性，建议最新的稳定版本
+- swoole版本在4.0.4 以上，推荐最新版本，更稳定
 
 
 

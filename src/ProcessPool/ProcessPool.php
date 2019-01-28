@@ -299,8 +299,9 @@ class ProcessPool
 
         @swoole_set_process_name("cupid tasker-worker-" . $workerId);
 
-
-        Runtime::enableCoroutine();
+        if (version_compare(SWOOLE_VERSION, '4.0.4', '1')) {
+            Runtime::enableCoroutine();
+        }
 
         $key = (string)$workerId;
 

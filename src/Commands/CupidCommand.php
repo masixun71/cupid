@@ -75,8 +75,8 @@ class CupidCommand extends Command
         $io->writeln("cupid 是基于swoole4.0 processPool 开发的消息同步补偿工具，适用于在<comment>canal</comment>这类的实时同步数据中间件之外的同步补偿工具，也适用于实时缓存这类的及时更新工具，对数据同步进行双保险，一般canal的延迟在毫秒左右，cupid建议设置在秒左右，做补偿专用，canal的消费端嵌入业务代码可以更方便开发和消费，cupid作为更通用的补偿方案建议不要嵌入业务代码，补偿机制采用http回调来保证，失败会重试直到成功，通知采用<comment>pushbear</comment>微信即时通知");
         $io->section('cupid 要求');
         $io->listing(array(
-            '<info>php >= 7.2</info>',
-            '<info>swoole >= 4.2.12</info>',
+            '<info>php >= 7.0</info>',
+            '<info>swoole >= 4.0.4</info>',
         ));
         $io->section('help');
         $io->listing(array(
