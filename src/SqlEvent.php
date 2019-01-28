@@ -65,7 +65,8 @@ class SqlEvent
         return [
             'type' => $this->type,
             'srcColumn' => $this->srcColumn,
-            'callbackUrl' => $this->callbackUrl
+            'callbackUrl' => $this->callbackUrl,
+            'retriesTime'=> $this->retriesTime
         ];
     }
 
