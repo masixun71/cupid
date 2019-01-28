@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d6db651ff1657903243af7ca563dce7b",
-    "content-hash": "ca6824753a3e30aa834a61e7e55ce6ad",
+    "hash": "9939e212d6af6af6b57782657d529601",
+    "content-hash": "79e12cd95b96eb79946b295eb3c5359c",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -733,12 +733,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wudi/swoole-ide-helper.git",
-                "reference": "a74ba5fc80640061f1fd74c8e586d9a73379d476"
+                "reference": "49ffb35bc89dbf49ce3f7a5f3ea1e560d7f72bc1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wudi/swoole-ide-helper/zipball/a74ba5fc80640061f1fd74c8e586d9a73379d476",
-                "reference": "a74ba5fc80640061f1fd74c8e586d9a73379d476",
+                "url": "https://api.github.com/repos/wudi/swoole-ide-helper/zipball/49ffb35bc89dbf49ce3f7a5f3ea1e560d7f72bc1",
+                "reference": "49ffb35bc89dbf49ce3f7a5f3ea1e560d7f72bc1",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -771,7 +771,7 @@
                 "sublime",
                 "swoole"
             ],
-            "time": "2019-01-22 01:42:44"
+            "time": "2019-01-25 04:12:27"
         }
     ],
     "aliases": [],
@@ -783,7 +783,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.2"
+        "php": ">=7.0"
     },
     "platform-dev": []
 }
