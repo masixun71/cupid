@@ -261,6 +261,10 @@ class ProcessPool
                         ]
                     ]);
                     if ($res->getStatusCode() != 200) {
+                        logger()->error('数据同步补偿数据回调地址调用不成功,重新push到回调队列', [
+                            'sqlEvent' => $sqlEvent->toArray(),
+                            'resStatusCode' => $res->getStatusCode()
+                        ]);
                         if ($sqlEvent->getRetriesTime() == 10) {
                             logger()->error('数据同步补偿数据回调地址已超过'.$sqlEvent->getRetriesTime().'次调用不成功,重新push到回调队列', [
                                 'sqlEvent' => $sqlEvent->toArray(),
