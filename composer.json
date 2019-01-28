@@ -16,7 +16,8 @@
         "symfony/console": "@stable",
         "monolog/monolog": "^1.23",
         "hassankhan/config": "^2.0",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.3",
+        "yurunsoft/guzzle-swoole":"^1.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

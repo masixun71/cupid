@@ -4,9 +4,59 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9939e212d6af6af6b57782657d529601",
-    "content-hash": "79e12cd95b96eb79946b295eb3c5359c",
+    "hash": "b1d3b5a17989be78f5986fa9e2cfc23e",
+    "content-hash": "0c61ef160c49e691f64e7525d00a9aa0",
     "packages": [
+        {
+            "name": "funkjedi/composer-include-files",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/funkjedi/composer-include-files.git",
+                "reference": "5e96f2e46537d99b8b72662796955dba739e251f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/funkjedi/composer-include-files/zipball/5e96f2e46537d99b8b72662796955dba739e251f",
+                "reference": "5e96f2e46537d99b8b72662796955dba739e251f",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://dl.laravel-china.org/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "composer-plugin-api": "^1.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "ComposerIncludeFiles\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "ComposerIncludeFiles\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Robertson",
+                    "email": "funkjedi@gmail.com"
+                }
+            ],
+            "description": "Include files at a higher priority than autoload files.",
+            "homepage": "https://github.com/funkjedi/composer-include-files",
+            "keywords": [
+                "autoload",
+                "composer"
+            ],
+            "time": "2016-12-23 18:15:30"
+        },
         {
             "name": "guzzlehttp/guzzle",
             "version": "6.3.3",
@@ -724,6 +774,56 @@
                 "shim"
             ],
             "time": "2018-09-21 13:07:52"
+        },
+        {
+            "name": "yurunsoft/guzzle-swoole",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Yurunsoft/Guzzle-Swoole.git",
+                "reference": "f94ff71ed907212eb5faa5d93dc47a610bb3e735"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Yurunsoft/Guzzle-Swoole/zipball/f94ff71ed907212eb5faa5d93dc47a610bb3e735",
+                "reference": "f94ff71ed907212eb5faa5d93dc47a610bb3e735",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://dl.laravel-china.org/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "composer-plugin-api": "^1.0",
+                "funkjedi/composer-include-files": "^1.0"
+            },
+            "require-dev": {
+                "composer/composer": "~1.0",
+                "guzzlehttp/guzzle": "~6.0",
+                "swoft/swoole-ide-helper": "~2.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Yurun\\Util\\Swoole\\Guzzle\\Plugin\\Plugin",
+                "include_files": [
+                    "src/load.php",
+                    "src/functions.php"
+                ]
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yurun\\Util\\Swoole\\Guzzle\\": "src/",
+                    "GuzzleHttp\\": "src/GuzzleHttp/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Guzzle Swoole Handler",
+            "time": "2018-09-25 01:26:19"
         }
     ],
     "packages-dev": [

@@ -261,12 +261,14 @@ class ProcessPool
                         ]
                     ]);
                     if ($res->getStatusCode() != 200) {
-                        if ($sqlEvent->getRetriesTime() == 10 && !empty($pushbearSendKey)) {
+                        if ($sqlEvent->getRetriesTime() == 10) {
                             logger()->error('数据同步补偿数据回调地址已超过'.$sqlEvent->getRetriesTime().'次调用不成功,重新push到回调队列', [
                                 'sqlEvent' => $sqlEvent->toArray(),
                                 'resStatusCode' => $res->getStatusCode()
                             ]);
-                            PushBear::push($pushbearSendKey, '数据同步补偿数据回调地址已超过'.$sqlEvent->getRetriesTime().'次调用不成功:请及时检查回调地址', "## sqlEvent\n\n`" . $sqlEvent->toJson() . "`\n\n## responseStatus\n\n" . $res->getStatusCode());
+                            if (!empty($pushbearSendKey)) {
+                                PushBear::push($pushbearSendKey, '数据同步补偿数据回调地址已超过'.$sqlEvent->getRetriesTime().'次调用不成功:请及时检查回调地址', "## sqlEvent\n\n`" . $sqlEvent->toJson() . "`\n\n## responseStatus\n\n" . $res->getStatusCode());
+                            }
                         }
                         $sqlEvent->incrRetriesTime();
                         $this->chan->push($sqlEvent);
